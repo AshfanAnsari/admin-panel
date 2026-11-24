@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canopy — Sales CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM TOKENS & RESET
+       ========================================================================== */
+    :root {
+      --bg-backdrop-from: #04120C;
+      --bg-backdrop-to: #010604;
+      --sidebar-top: #2E7D5C;
+      --sidebar-mid: #154E35;
+      --sidebar-bottom: #061F14;
+      
+      --sheet-bg: #FBFCFB;
+      --card-bg: #FDFDFD;
+      --card-border: #E4EAE4;
+      
+      --ink: #101613;
+      --muted: #66706A;
+      --subtle: #8C9990;
+      
+      --accent-emerald: #1F7B4B;
+      --accent-emerald-dark: #14532D;
+      --delta-green: #12805C;
+      --delta-bg: #E3F4E8;
+      --mint-container-from: #E0EEE6;
+      --mint-container-to: #EAF4ED;
+      --mint-chip: #E3F2E7;
+      
+      --amber-bg: #FDF3E0;
+      --amber-border: #F8DEB5;
+      --amber-text: #8A5A12;
+      --badge-orange: #F59E0B;
+      
+      --radius-panel: 26px;
+      --radius-sheet: 30px;
+      --radius-card: 18px;
+      --radius-pill: 14px;
+      --radius-chip: 12px;
+      
+      --shadow-app: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 30px 80px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      --shadow-card: 0 4px 16px rgba(6, 40, 26, 0.04);
+      --shadow-card-hover: 0 12px 32px rgba(6, 40, 26, 0.08);
+      --shadow-pill: 0 2px 8px rgba(6, 40, 26, 0.04);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, #175438 0%, #062316 28%, var(--bg-backdrop-from) 60%, var(--bg-backdrop-to) 100%);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ==========================================================================
+       MAIN APP FLOATING CONTAINER
+       ========================================================================== */
+    .app-frame {
+      width: 1440px;
+      max-width: 100%;
+      min-height: 880px;
+      background: linear-gradient(180deg, var(--sidebar-top) 0%, var(--sidebar-mid) 40%, var(--sidebar-bottom) 100%);
+      border-radius: var(--radius-panel);
+      box-shadow: var(--shadow-app);
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      margin: 20px auto;
+    }
+
+    /* Ambient radial glow behind logo area */
+    .app-frame::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 280px;
+      background: radial-gradient(circle at 80px 70px, rgba(74, 222, 128, 0.28) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==========================================================================
+       SIDEBAR
+       ========================================================================== */
+    .sidebar {
+      width: 215px;
+      min-width: 215px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 0 24px 18px;
+      position: relative;
+      z-index: 5;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.collapsed {
+      width: 76px;
+      min-width: 76px;
+      padding: 24px 0 24px 12px;
+    }
+
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Brand Logo Row */
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 14px;
+      position: relative;
+    }
+
+    .brand-identity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #FFFFFF;
+      overflow: hidden;
+    }
+
+    .logo-badge {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      transition: opacity 0.2s ease, width 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: #FFFFFF;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 2px;
+    }
+
+    /* Circular Collapse Chevron Button */
+    .collapse-button {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .collapse-button:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #FFFFFF;
+      transform: scale(1.05);
+    }
+
+    .collapse-icon {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.collapsed .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .sidebar.collapsed .brand-text {
+      opacity: 0;
+      width: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    .sidebar.collapsed .brand-row {
+      padding-right: 8px;
+    }
+
+    /* Navigation List */
+    .nav-group {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    /* Nav links / Translucent pills */
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 42px;
+      padding: 0 14px;
+      margin-right: 14px;
+      border-radius: var(--radius-chip);
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+      position: relative;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-label {
+      flex: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    .badge-orange {
+      background: var(--badge-orange);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      line-height: 1.4;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ==========================================================================
+       ACTIVE NAV PILL GEOMETRY — CONNECTS SEAMLESSLY TO CONTENT SHEET
+       ========================================================================== */
+    .nav-item.active .nav-link {
+      background: var(--sheet-bg);
+      color: var(--ink);
+      font-weight: 700;
+      border: none;
+      margin-right: 0;
+      border-radius: var(--radius-chip) 0 0 var(--radius-chip);
+      box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.12);
+      z-index: 20;
+    }
+
+    .nav-item.active .nav-link:hover {
+      background: var(--sheet-bg);
+      color: var(--ink);
+    }
+
+    /* Inverted concave fillets on active pill */
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -20px;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle at 0 0, transparent 20px, var(--sheet-bg) 20.5px);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: -20px;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle at 0 20px, transparent 20px, var(--sheet-bg) 20.5px);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .sidebar.collapsed .nav-link {
+      padding: 0 14px;
+      margin-right: 10px;
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-item.active .nav-link {
+      margin-right: 0;
+    }
+
+    .sidebar.collapsed .nav-label,
+    .sidebar.collapsed .badge-orange {
+      display: none;
+    }
+
+    /* Q4 Quota Translucent Card */
+    .quota-card {
+      margin: 12px 14px 12px 0;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .quota-ring-box {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quota-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .quota-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .quota-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .sidebar.collapsed .quota-card {
+      margin-right: 10px;
+      padding: 8px 4px;
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .quota-info {
+      display: none;
+    }
+
+    /* Secondary Nav (Settings, Help) */
+    .secondary-nav {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .secondary-nav .nav-link {
+      height: 38px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .secondary-nav .nav-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+    }
+
+    /* User Card */
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      padding-right: 14px;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+    }
+
+    .avatar-badge {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #EA580C;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .online-dot {
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10B981;
+      border: 2px solid var(--sidebar-bottom);
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
+
+    .user-role {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+
+    .logout-button {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .logout-button:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar.collapsed .sidebar-bottom {
+      padding-right: 10px;
+    }
+
+    .sidebar.collapsed .user-card {
+      padding: 6px 0;
+      justify-content: center;
+      background: transparent;
+      border: none;
+    }
+
+    .sidebar.collapsed .user-info,
+    .sidebar.collapsed .logout-button {
+      display: none;
+    }
+
+    /* ==========================================================================
+       CONTENT SHEET (OVERLAPS SIDEBAR)
+       ========================================================================== */
+    .content-sheet {
+      flex: 1;
+      background: var(--sheet-bg);
+      border-top-left-radius: var(--radius-sheet);
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      z-index: 10;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ==========================================================================
+       TOPBAR
+       ========================================================================== */
+    .topbar {
+      height: 64px;
+      min-height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(228, 234, 228, 0.7);
+      background: transparent;
+      position: sticky;
+      top: 0;
+      z-index: 15;
+    }
+
+    .date-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+    }
+
+    .date-pill:hover {
+      background: #F8FAF8;
+      border-color: #D4DDD4;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-bar {
+      width: 320px;
+      height: 38px;
+      border-radius: 999px;
+      background: #F0F3F0;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 10px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .search-bar:focus-within {
+      background: #FFFFFF;
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 0 3px rgba(31, 123, 75, 0.12);
+    }
+
+    .search-icon {
+      color: var(--subtle);
+      width: 15px;
+      height: 15px;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .search-kbd {
+      background: #DFE3DF;
+      color: #55625A;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .bell-button {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4B5563;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .bell-button:hover {
+      background: #F3F6F3;
+      color: var(--ink);
+    }
+
+    .bell-dot {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--badge-orange);
+      border: 1.5px solid #FFFFFF;
+    }
+
+    .add-action-button {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-emerald) 0%, var(--accent-emerald-dark) 100%);
+      border: none;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(20, 83, 45, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .add-action-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(20, 83, 45, 0.45);
+    }
+
+    /* Content Body Container */
+    .sheet-body {
+      padding: 28px 32px 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Views container */
+    .view-panel {
+      display: none;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .view-panel.active {
+      display: flex;
+    }
+
+    /* ==========================================================================
+       HEADER ROW
+       ========================================================================== */
+    .header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      color: var(--delta-green);
+      text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--delta-green);
+    }
+
+    .headline-h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.6px;
+      line-height: 1.2;
+      margin-top: 4px;
+    }
+
+    .header-subline {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .text-action-button {
+      background: transparent;
+      border: none;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: background 0.18s ease;
+    }
+
+    .text-action-button:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .pill-action-button {
+      background: linear-gradient(135deg, var(--accent-emerald) 0%, var(--accent-emerald-dark) 100%);
+      color: #FFFFFF;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(20, 83, 45, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .pill-action-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(20, 83, 45, 0.4);
+    }
+
+    /* ==========================================================================
+       STAT CARDS ×4
+       ========================================================================== */
+    .stat-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-card);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    .stat-row-1 {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .stat-chip {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 8px;
+      background: var(--mint-chip);
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .stat-row-2 {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.6px;
+      line-height: 1;
+    }
+
+    .stat-suffix {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .stat-row-3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    .delta-pill {
+      background: var(--delta-bg);
+      color: var(--delta-green);
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .sparkline-box {
+      width: 76px;
+      height: 28px;
+    }
+
+    .sparkline-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* ==========================================================================
+       INSIGHTS STRIP
+       ========================================================================== */
+    .insights-strip {
+      background: linear-gradient(135deg, var(--mint-container-from) 0%, var(--mint-container-to) 100%);
+      border-radius: var(--radius-card);
+      padding: 10px 12px;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+    }
+
+    .insights-badge-tile {
+      background: #FFFFFF;
+      border-radius: var(--radius-pill);
+      padding: 12px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: var(--shadow-pill);
+      min-width: 96px;
+    }
+
+    .insights-square-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--accent-emerald);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .insights-text-tag {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      color: var(--accent-emerald);
+      text-transform: uppercase;
+    }
+
+    .insight-pill-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(228, 234, 228, 0.7);
+      border-radius: var(--radius-pill);
+      padding: 12px 14px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      box-shadow: var(--shadow-pill);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .insight-pill-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(31, 123, 75, 0.35);
+    }
+
+    .insight-pill-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .insight-icon-chip {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .insight-icon-chip.peach {
+      background: #FEF0E6;
+      color: #D97706;
+    }
+
+    .insight-icon-chip.mint {
+      background: #E6F4EA;
+      color: var(--accent-emerald);
+    }
+
+    .insight-icon-chip.rose {
+      background: #FEECEB;
+      color: #E11D48;
+    }
+
+    .insight-icon-chip.pink {
+      background: #FDF2F4;
+      color: #BE185D;
+    }
+
+    .insight-pill-text {
+      font-size: 13px;
+      color: #33403A;
+      line-height: 1.35;
+      font-weight: 500;
+    }
+
+    .insight-pill-text strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .insight-cta {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding-left: 34px;
+      transition: transform 0.15s ease;
+    }
+
+    .insight-pill-card:hover .insight-cta {
+      transform: translateX(3px);
+    }
+
+    /* ==========================================================================
+       ANALYTICS ROW (CHART & FORECAST: 2fr : 1fr)
+       ========================================================================== */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .panel-card {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-card);
+      padding: 22px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header-bar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title-stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+
+    .card-sub-copy {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* Chart dataset toggle pill */
+    .chart-toggle-pill {
+      background: #F0F3F0;
+      border-radius: 999px;
+      padding: 3px;
+      display: inline-flex;
+      gap: 2px;
+    }
+
+    .toggle-option {
+      border: none;
+      background: transparent;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .toggle-option.active {
+      background: #FFFFFF;
+      color: var(--ink);
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-viewport {
+      flex: 1;
+      width: 100%;
+      min-height: 230px;
+      position: relative;
+    }
+
+    .chart-full-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Forecast Card specifics */
+    .forecast-card-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .report-link {
+      color: var(--accent-emerald);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      transition: transform 0.15s ease;
+    }
+
+    .report-link:hover {
+      transform: translateX(2px);
+    }
+
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 2px 0 10px 0;
+    }
+
+    .gauge-svg-element {
+      width: 220px;
+      height: 126px;
+      overflow: visible;
+    }
+
+    .legend-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 4px 0 12px 0;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .legend-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .legend-bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .bullet-closed {
+      background: var(--accent-emerald);
+    }
+
+    .bullet-commit {
+      background: #34D399;
+    }
+
+    .bullet-best {
+      background: #CBD5E1;
+    }
+
+    .legend-amount {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* Amber Gap Warning Strip */
+    .amber-warning-strip {
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--amber-text);
+    }
+
+    .warning-icon {
+      color: var(--amber-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ==========================================================================
+       TASKS VIEW SPECIFICS
+       ========================================================================== */
+    .tasks-action-bar {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 6px 8px 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .task-type-selectors {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--subtle);
+    }
+
+    .task-type-btn {
+      background: transparent;
+      border: none;
+      color: var(--subtle);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .task-type-btn:hover, .task-type-btn.active {
+      color: var(--accent-emerald);
+      background: var(--mint-chip);
+    }
+
+    .add-task-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .add-task-input::placeholder {
+      color: var(--subtle);
+    }
+
+    .task-date-selector {
+      background: #F0F3F0;
+      border: none;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-submit-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--mint-chip);
+      border: none;
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .task-submit-btn:hover {
+      background: var(--accent-emerald);
+      color: #FFFFFF;
+      transform: scale(1.05);
+    }
+
+    /* Filter Chips Row */
+    .filter-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-chip {
+      background: transparent;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .filter-chip:hover {
+      color: var(--ink);
+      background: #EEF2EE;
+    }
+
+    .filter-chip.active {
+      background: #FFFFFF;
+      color: var(--ink);
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Tasks Layout: 2fr list : 1fr progress */
+    .tasks-grid-layout {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .task-cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item-card {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(6, 40, 26, 0.03);
+      transition: all 0.2s ease;
+    }
+
+    .task-item-card:hover {
+      border-color: #D4DDD4;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(6, 40, 26, 0.06);
+    }
+
+    .task-left-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition: all 0.18s ease;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--accent-emerald);
+    }
+
+    .task-item-card.completed .task-checkbox {
+      background: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      color: #FFFFFF;
+    }
+
+    .task-item-card.completed .task-item-title {
+      text-decoration: line-through;
+      color: var(--subtle);
+    }
+
+    .task-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .task-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .task-meta-line {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .task-meta-line.overdue {
+      color: #DC2626;
+      font-weight: 600;
+    }
+
+    .priority-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .priority-badge.high {
+      background: #FEE2E2;
+      color: #B91C1C;
+    }
+
+    .priority-badge.medium {
+      background: #FEF3C7;
+      color: #B45309;
+    }
+
+    .priority-badge.low {
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    /* Tasks Right Rail Card */
+    .tasks-progress-card {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-card);
+      padding: 22px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .daily-progress-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .progress-donut-box {
+      width: 64px;
+      height: 64px;
+      min-width: 64px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .daily-progress-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .progress-h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .progress-count-sub {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .rail-divider {
+      height: 1px;
+      background: var(--card-border);
+      width: 100%;
+    }
+
+    .by-type-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .by-type-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .by-type-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .by-type-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .by-type-count {
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* SVG utility classes */
+    .chart-axis-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      fill: #8C9990;
+    }
+
+    .chart-gridline {
+      stroke: #EEF2EE;
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 999px;
+    }
+
+    @media (max-width: 1200px) {
+      .stat-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .insights-strip {
+        flex-wrap: wrap;
+      }
+      .analytics-grid, .tasks-grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       FLOATING APP FRAME
+       ======================================================================== -->
+  <div class="app-frame" id="appFrame">
+
+    <!-- ======================================================================
+         SIDEBAR (OVERLAPPED BY CONTENT SHEET)
+         ====================================================================== -->
+    <aside class="sidebar" id="appSidebar">
+
+      <div class="sidebar-top">
+        <!-- Logo Row -->
+        <div class="brand-row">
+          <a href="#" class="brand-identity" title="Canopy — Sales CRM">
+            <div class="logo-badge">
+              <!-- Leaf SVG Icon -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+              </svg>
+            </div>
+            <div class="brand-text">
+              <span class="brand-name">Canopy</span>
+              <span class="brand-sub">Sales CRM</span>
+            </div>
+          </a>
+
+          <!-- Chevron Collapse Button at Sheet Edge -->
+          <button class="collapse-button" id="sidebarCollapseBtn" aria-label="Toggle sidebar collapse" title="Collapse sidebar">
+            <svg class="collapse-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Main Navigation Pills -->
+        <nav aria-label="Main Navigation">
+          <ul class="nav-group">
+
+            <!-- 1. Dashboard (Active by default) -->
+            <li class="nav-item active" id="navItemDashboard">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkDashboard" title="Dashboard">
+                <span class="nav-icon">
+                  <!-- Dashboard 4-box Grid SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                  </svg>
+                </span>
+                <span class="nav-label">Dashboard</span>
+              </a>
+            </li>
+
+            <!-- 2. Contacts -->
+            <li class="nav-item" id="navItemContacts">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkContacts" title="Contacts">
+                <span class="nav-icon">
+                  <!-- User Contacts SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </span>
+                <span class="nav-label">Contacts</span>
+              </a>
+            </li>
+
+            <!-- 3. Deals -->
+            <li class="nav-item" id="navItemDeals">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkDeals" title="Deals">
+                <span class="nav-icon">
+                  <!-- Deals Briefcase / Pipeline SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </span>
+                <span class="nav-label">Deals</span>
+              </a>
+            </li>
+
+            <!-- 4. Tasks (Orange badge "6") -->
+            <li class="nav-item" id="navItemTasks">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkTasks" title="Tasks">
+                <span class="nav-icon">
+                  <!-- Checkbox Square SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                </span>
+                <span class="nav-label">Tasks</span>
+                <span class="badge-orange">6</span>
+              </a>
+            </li>
+
+            <!-- 5. Calendar -->
+            <li class="nav-item" id="navItemCalendar">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkCalendar" title="Calendar">
+                <span class="nav-icon">
+                  <!-- Calendar SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                </span>
+                <span class="nav-label">Calendar</span>
+              </a>
+            </li>
+
+            <!-- 6. Reports -->
+            <li class="nav-item" id="navItemReports">
+              <a href="javascript:void(0)" class="nav-link" id="navLinkReports" title="Reports">
+                <span class="nav-icon">
+                  <!-- Pie / Analytics SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                  </svg>
+                </span>
+                <span class="nav-label">Reports</span>
+              </a>
+            </li>
+
+          </ul>
+        </nav>
+
+        <!-- Q4 Quota Translucent Card -->
+        <div class="quota-card" title="Q4 quota: $171K of $250K (69%)">
+          <div class="quota-ring-box">
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <!-- Background circle -->
+              <circle cx="20" cy="20" r="15" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" />
+              <!-- Progress ring (69% of 2*pi*15 ≈ 94.25 is ~65.03, offset 29.22) -->
+              <circle cx="20" cy="20" r="15" fill="none" stroke="#34D399" stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-dasharray="94.25"
+                      stroke-dashoffset="29.22"
+                      transform="rotate(-90 20 20)" />
+              <text x="20" y="23" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" font-weight="700" fill="#FFFFFF">69%</text>
+            </svg>
+          </div>
+          <div class="quota-info">
+            <span class="quota-title">Q4 quota</span>
+            <span class="quota-sub">$171K of $250K</span>
+          </div>
+        </div>
+
+        <!-- Secondary Nav (Settings, Help Center) -->
+        <ul class="secondary-nav">
+          <li class="nav-item">
+            <a href="javascript:void(0)" class="nav-link" title="Settings">
+              <span class="nav-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Settings</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" class="nav-link" title="Help center">
+              <span class="nav-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </span>
+              <span class="nav-label">Help center</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Bottom User Card -->
+      <div class="sidebar-bottom">
+        <div class="user-card" title="Ava Patel — Head of Sales">
+          <div class="avatar-wrapper">
+            <div class="avatar-badge">AP</div>
+            <div class="online-dot"></div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Ava Patel</span>
+            <span class="user-role">Head of Sales</span>
+          </div>
+          <button class="logout-button" title="Log out" aria-label="Log out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ======================================================================
+         CONTENT SHEET (SURFACE #FBFCFB, OVERLAPS GREEN SIDEBAR)
+         ====================================================================== -->
+    <main class="content-sheet" id="contentSheet">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <!-- Date pill at left -->
+        <div class="date-pill" title="Current Date">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <span>Mon, Nov 23</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+
+        <!-- Right actions cluster -->
+        <div class="topbar-right">
+          <!-- Search Pill -->
+          <div class="search-bar">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" class="search-input" id="globalSearchInput" placeholder="Search contacts, deals, actions…" aria-label="Search">
+            <kbd class="search-kbd">⌘K</kbd>
+          </div>
+
+          <!-- Notification Bell -->
+          <button class="bell-button" title="Notifications" aria-label="Notifications">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="bell-dot"></span>
+          </button>
+
+          <!-- Dark green circular + button -->
+          <button class="add-action-button" title="Create new" aria-label="Create new">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- SHEET BODY -->
+      <div class="sheet-body">
+
+        <!-- ==================================================================
+             VIEW 1: DASHBOARD OVERVIEW (DEFAULT)
+             ================================================================== -->
+        <section class="view-panel active" id="viewDashboard">
+
+          <!-- Header Row -->
+          <div class="header-row">
+            <div class="header-titles">
+              <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                <span>OVERVIEW</span>
+              </div>
+              <h1 class="headline-h1">Good afternoon, Ava</h1>
+              <p class="header-subline">You have 6 tasks due today and 4 deals closing this week.</p>
+            </div>
+            <div class="header-actions">
+              <button class="text-action-button">
+                <!-- Sliders SVG -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="21" x2="4" y2="14"></line>
+                  <line x1="4" y1="10" x2="4" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="3"></line>
+                  <line x1="20" y1="21" x2="20" y2="16"></line>
+                  <line x1="20" y1="12" x2="20" y2="3"></line>
+                  <line x1="1" y1="14" x2="7" y2="14"></line>
+                  <line x1="9" y1="8" x2="15" y2="8"></line>
+                  <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <span>Customize</span>
+              </button>
+              <button class="pill-action-button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ New deal</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stat Cards ×4 -->
+          <div class="stat-cards-grid">
+
+            <!-- Card 1: Revenue won -->
+            <div class="stat-card">
+              <div class="stat-row-1">
+                <div class="stat-chip">
+                  <!-- Dollar currency SVG -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
+                <span class="stat-label">Revenue won</span>
+              </div>
+              <div class="stat-row-2">
+                <span class="stat-value">$171K</span>
+                <span class="stat-suffix">this quarter</span>
+              </div>
+              <div class="stat-row-3">
+                <span class="delta-pill">↗ +18.6%</span>
+                <div class="sparkline-box">
+                  <!-- Sparkline 1 -->
+                  <svg class="sparkline-svg" viewBox="0 0 76 28" fill="none">
+                    <defs>
+                      <linearGradient id="spk1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,22 C14,21 24,17 38,18 C50,19 56,8 64,10 C70,11 72,5 76,4 L76,28 L0,28 Z" fill="url(#spk1)"/>
+                    <path d="M0,22 C14,21 24,17 38,18 C50,19 56,8 64,10 C70,11 72,5 76,4" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Open pipeline -->
+            <div class="stat-card">
+              <div class="stat-row-1">
+                <div class="stat-chip">
+                  <!-- Pipeline SVG -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+                <span class="stat-label">Open pipeline</span>
+              </div>
+              <div class="stat-row-2">
+                <span class="stat-value">$641K</span>
+                <span class="stat-suffix">15 deals</span>
+              </div>
+              <div class="stat-row-3">
+                <span class="delta-pill">↗ +9.1%</span>
+                <div class="sparkline-box">
+                  <!-- Sparkline 2 -->
+                  <svg class="sparkline-svg" viewBox="0 0 76 28" fill="none">
+                    <defs>
+                      <linearGradient id="spk2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,24 C14,23 25,18 36,19 C48,20 54,12 62,13 C68,14 71,7 76,6 L76,28 L0,28 Z" fill="url(#spk2)"/>
+                    <path d="M0,24 C14,23 25,18 36,19 C48,20 54,12 62,13 C68,14 71,7 76,6" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Win rate -->
+            <div class="stat-card">
+              <div class="stat-row-1">
+                <div class="stat-chip">
+                  <!-- Target / Bullseye SVG -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                  </svg>
+                </div>
+                <span class="stat-label">Win rate</span>
+              </div>
+              <div class="stat-row-2">
+                <span class="stat-value">32.4</span>
+                <span class="stat-suffix">%</span>
+              </div>
+              <div class="stat-row-3">
+                <span class="delta-pill">↗ +3.2 pts</span>
+                <div class="sparkline-box">
+                  <!-- Sparkline 3 -->
+                  <svg class="sparkline-svg" viewBox="0 0 76 28" fill="none">
+                    <defs>
+                      <linearGradient id="spk3" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,22 C12,22 24,16 38,17 C50,18 58,10 66,11 C71,12 73,7 76,6 L76,28 L0,28 Z" fill="url(#spk3)"/>
+                    <path d="M0,22 C12,22 24,16 38,17 C50,18 58,10 66,11 C71,12 73,7 76,6" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: New leads -->
+            <div class="stat-card">
+              <div class="stat-row-1">
+                <div class="stat-chip">
+                  <!-- User Plus SVG -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                  </svg>
+                </div>
+                <span class="stat-label">New leads</span>
+              </div>
+              <div class="stat-row-2">
+                <span class="stat-value">6</span>
+                <span class="stat-suffix">this month</span>
+              </div>
+              <div class="stat-row-3">
+                <span class="delta-pill">↗ +4</span>
+                <div class="sparkline-box">
+                  <!-- Sparkline 4 -->
+                  <svg class="sparkline-svg" viewBox="0 0 76 28" fill="none">
+                    <defs>
+                      <linearGradient id="spk4" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,22 C16,22 22,17 35,17 C48,17 56,9 65,9 C70,9 72,5 76,4 L76,28 L0,28 Z" fill="url(#spk4)"/>
+                    <path d="M0,22 C16,22 22,17 35,17 C48,17 56,9 65,9 C70,9 72,5 76,4" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5: Visitors -->
+            <div class="stat-card">
+              <div class="stat-row-1">
+                <div class="stat-chip">
+                  <!-- Eye SVG -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </div>
+                <span class="stat-label">Visitors</span>
+              </div>
+              <div class="stat-row-2">
+                <span class="stat-value">2,847</span>
+                <span class="stat-suffix">this month</span>
+              </div>
+              <div class="stat-row-3">
+                <span class="delta-pill">↗ +22.6%</span>
+                <div class="sparkline-box">
+                  <!-- Sparkline 5 -->
+                  <svg class="sparkline-svg" viewBox="0 0 76 28" fill="none">
+                    <defs>
+                      <linearGradient id="spk5" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M0,24 C14,24 20,19 32,15 C44,11 54,13 63,8 C69,5 72,4 76,3 L76,28 L0,28 Z" fill="url(#spk5)"/>
+                    <path d="M0,24 C14,24 20,19 32,15 C44,11 54,13 63,8 C69,5 72,4 76,3" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Insights Strip -->
+          <div class="insights-strip">
+            <!-- First Tile: Rounded white with green sparkle icon & INSIGHTS -->
+            <div class="insights-badge-tile">
+              <div class="insights-square-icon">
+                <!-- Sparkle SVG -->
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"></path>
+                </svg>
+              </div>
+              <span class="insights-text-tag">INSIGHTS</span>
+            </div>
+
+            <!-- Insight Pill 1 -->
+            <div class="insight-pill-card">
+              <div class="insight-pill-top">
+                <div class="insight-icon-chip peach">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                </div>
+                <div class="insight-pill-text">
+                  4 deals worth <strong>$191K</strong> close in the next 7 days.
+                </div>
+              </div>
+              <span class="insight-cta">Review &rarr;</span>
+            </div>
+
+            <!-- Insight Pill 2 -->
+            <div class="insight-pill-card">
+              <div class="insight-pill-top">
+                <div class="insight-icon-chip mint">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <circle cx="12" cy="12" r="6"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                  </svg>
+                </div>
+                <div class="insight-pill-text">
+                  You're at <strong>69%</strong> of quota, <strong>$78.7K</strong> to go with 6 weeks left.
+                </div>
+              </div>
+              <span class="insight-cta">Forecast &rarr;</span>
+            </div>
+
+            <!-- Insight Pill 3 -->
+            <div class="insight-pill-card">
+              <div class="insight-pill-top">
+                <div class="insight-icon-chip rose">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <div class="insight-pill-text">
+                  <strong>Jonas Weber</strong> at Pinecrest Bank hasn't heard from you in <strong>14 days</strong>.
+                </div>
+              </div>
+              <span class="insight-cta">Open &rarr;</span>
+            </div>
+
+            <!-- Insight Pill 4 -->
+            <div class="insight-pill-card" id="insightPillTasks">
+              <div class="insight-pill-top">
+                <div class="insight-icon-chip pink">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <div class="insight-pill-text">
+                  <strong>2 overdue</strong> follow-ups need attention today.
+                </div>
+              </div>
+              <span class="insight-cta">Tasks &rarr;</span>
+            </div>
+
+          </div>
+
+          <!-- Analytics Row (Grid 2fr : 1fr) -->
+          <div class="analytics-grid">
+
+            <!-- Chart Card (2fr) -->
+            <div class="panel-card">
+              <div class="card-header-bar">
+                <div class="card-title-stack">
+                  <h2 class="card-h2">Revenue vs target</h2>
+                  <span class="card-sub-copy" id="chartSubtitleText">Monthly closed-won revenue against plan</span>
+                </div>
+                <div class="chart-toggle-pill">
+                  <button class="toggle-option active" id="btnToggleRevenue">Revenue</button>
+                  <button class="toggle-option" id="btnToggleDeals">Deals</button>
+                </div>
+              </div>
+
+              <!-- Inline SVG Chart -->
+              <div class="chart-viewport">
+                <svg class="chart-full-svg" viewBox="0 0 660 220" preserveAspectRatio="none">
+                  <defs>
+                    <!-- Area Gradient for Revenue -->
+                    <linearGradient id="chartRevenueAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.22"/>
+                      <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.01"/>
+                    </linearGradient>
+                    <!-- Forecast Area Gradient -->
+                    <linearGradient id="chartForecastAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.10"/>
+                      <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.0"/>
+                    </linearGradient>
+                    <!-- Area Gradient for Deals -->
+                    <linearGradient id="chartDealsAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#1F7B4B" stop-opacity="0.22"/>
+                      <stop offset="100%" stop-color="#1F7B4B" stop-opacity="0.01"/>
+                    </linearGradient>
+                  </defs>
+
+                  <!-- Horizontal Gridlines -->
+                  <line x1="55" y1="35" x2="635" y2="35" class="chart-gridline" />
+                  <line x1="55" y1="80" x2="635" y2="80" class="chart-gridline" />
+                  <line x1="55" y1="125" x2="635" y2="125" class="chart-gridline" />
+                  <line x1="55" y1="170" x2="635" y2="170" class="chart-gridline" />
+                  <line x1="55" y1="200" x2="635" y2="200" stroke="#E4EAE4" stroke-width="1" />
+
+                  <!-- Dynamic Y-Axis Labels: Revenue -->
+                  <g id="yAxisRevenue">
+                    <text x="46" y="39" class="chart-axis-text" text-anchor="end">$200K</text>
+                    <text x="46" y="84" class="chart-axis-text" text-anchor="end">$150K</text>
+                    <text x="46" y="129" class="chart-axis-text" text-anchor="end">$100K</text>
+                    <text x="46" y="174" class="chart-axis-text" text-anchor="end">$50K</text>
+                  </g>
+
+                  <!-- Dynamic Y-Axis Labels: Deals -->
+                  <g id="yAxisDeals" style="display: none;">
+                    <text x="46" y="39" class="chart-axis-text" text-anchor="end">20</text>
+                    <text x="46" y="84" class="chart-axis-text" text-anchor="end">15</text>
+                    <text x="46" y="129" class="chart-axis-text" text-anchor="end">10</text>
+                    <text x="46" y="174" class="chart-axis-text" text-anchor="end">5</text>
+                  </g>
+
+                  <!-- X-Axis Months (Jan - Dec) -->
+                  <g>
+                    <text x="65" y="215" class="chart-axis-text" text-anchor="middle">Jan</text>
+                    <text x="114" y="215" class="chart-axis-text" text-anchor="middle">Feb</text>
+                    <text x="163" y="215" class="chart-axis-text" text-anchor="middle">Mar</text>
+                    <text x="212" y="215" class="chart-axis-text" text-anchor="middle">Apr</text>
+                    <text x="261" y="215" class="chart-axis-text" text-anchor="middle">May</text>
+                    <text x="310" y="215" class="chart-axis-text" text-anchor="middle">Jun</text>
+                    <text x="359" y="215" class="chart-axis-text" text-anchor="middle">Jul</text>
+                    <text x="408" y="215" class="chart-axis-text" text-anchor="middle">Aug</text>
+                    <text x="457" y="215" class="chart-axis-text" text-anchor="middle">Sep</text>
+                    <text x="506" y="215" class="chart-axis-text" text-anchor="middle">Oct</text>
+                    <text x="555" y="215" class="chart-axis-text" text-anchor="middle" font-weight="700" fill="#1F7B4B">Nov</text>
+                    <text x="605" y="215" class="chart-axis-text" text-anchor="middle">Dec</text>
+                  </g>
+
+                  <!-- ================= DATASET 1: REVENUE ================= -->
+                  <g id="datasetRevenueGroup">
+                    <!-- Dashed Target Line below actuals -->
+                    <path d="M 65,148 C 163,142 261,130 359,118 C 457,106 555,88 605,82"
+                          fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 5" />
+
+                    <!-- Filled Area under Actuals (Jan to Nov) -->
+                    <path d="M 65,200 L 65,130 C 114,124 163,126 212,118 C 261,110 310,114 359,96 C 408,88 457,80 506,72 C 530,68 542,52 555,50 L 555,200 Z"
+                          fill="url(#chartRevenueAreaGrad)" />
+
+                    <!-- Forecast Area (Nov to Dec) -->
+                    <path d="M 555,200 L 555,50 C 580,42 595,36 605,34 L 605,200 Z"
+                          fill="url(#chartForecastAreaGrad)" />
+
+                    <!-- Solid Emerald Line Jan-Nov -->
+                    <path d="M 65,130 C 114,124 163,126 212,118 C 261,110 310,114 359,96 C 408,88 457,80 506,72 C 530,68 542,52 555,50"
+                          fill="none" stroke="#1F7B4B" stroke-width="2.5" stroke-linecap="round" />
+
+                    <!-- Dotted Forecast Line Nov to Dec -->
+                    <path d="M 555,50 C 580,42 595,36 605,34"
+                          fill="none" stroke="#1F7B4B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4" />
+
+                    <!-- Nov Actual Open Circle Marker -->
+                    <circle cx="555" cy="50" r="5" fill="#FFFFFF" stroke="#1F7B4B" stroke-width="2.5" />
+
+                    <!-- Nov Highlight Badge -->
+                    <rect x="518" y="22" width="74" height="20" rx="6" fill="#101613" />
+                    <text x="555" y="36" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">Nov: $171K</text>
+                  </g>
+
+                  <!-- ================= DATASET 2: DEALS ================= -->
+                  <g id="datasetDealsGroup" style="display: none;">
+                    <!-- Dashed Target Line for Deals -->
+                    <path d="M 65,155 C 163,148 261,135 359,122 C 457,110 555,95 605,88"
+                          fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 5" />
+
+                    <!-- Deals Area -->
+                    <path d="M 65,200 L 65,142 C 114,136 163,130 212,122 C 261,116 310,105 359,102 C 408,94 457,86 506,78 C 530,72 542,66 555,62 L 555,200 Z"
+                          fill="url(#chartDealsAreaGrad)" />
+
+                    <!-- Deals Forecast Area -->
+                    <path d="M 555,200 L 555,62 C 580,54 595,48 605,44 L 605,200 Z"
+                          fill="url(#chartForecastAreaGrad)" />
+
+                    <!-- Solid Line for Deals Jan-Nov -->
+                    <path d="M 65,142 C 114,136 163,130 212,122 C 261,116 310,105 359,102 C 408,94 457,86 506,78 C 530,72 542,66 555,62"
+                          fill="none" stroke="#1F7B4B" stroke-width="2.5" stroke-linecap="round" />
+
+                    <!-- Dotted Forecast for Deals Nov to Dec -->
+                    <path d="M 555,62 C 580,54 595,48 605,44"
+                          fill="none" stroke="#1F7B4B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4" />
+
+                    <!-- Deals Marker -->
+                    <circle cx="555" cy="62" r="5" fill="#FFFFFF" stroke="#1F7B4B" stroke-width="2.5" />
+
+                    <!-- Deals Badge -->
+                    <rect x="515" y="32" width="80" height="20" rx="6" fill="#101613" />
+                    <text x="555" y="46" fill="#FFFFFF" font-family="'Plus Jakarta Sans', sans-serif" font-size="10.5" font-weight="700" text-anchor="middle">Nov: 15 deals</text>
+                  </g>
+
+                </svg>
+              </div>
+            </div>
+
+            <!-- Forecast Card (1fr) -->
+            <div class="panel-card">
+              <div class="forecast-card-content">
+                <div>
+                  <div class="card-header-bar">
+                    <div class="card-title-stack">
+                      <h2 class="card-h2">Quarter forecast</h2>
+                      <span class="card-sub-copy">Against a $250K quota</span>
+                    </div>
+                    <a href="javascript:void(0)" class="report-link" title="View Full Report">
+                      <span>Report</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </a>
+                  </div>
+
+                  <!-- Thick Emerald Ring Gauge (SVG Arc, ~270°) -->
+                  <div class="gauge-wrap">
+                    <svg class="gauge-svg-element" viewBox="0 0 220 130">
+                      <!-- Background light track -->
+                      <path d="M 32 115 A 78 78 0 1 1 188 115"
+                            fill="none" stroke="#EBF2ED" stroke-width="15" stroke-linecap="round" />
+                      <!-- Active emerald arc (69% progress) -->
+                      <!-- Arc circumference of ~270 deg (approx 367) -> 69% is ~253, offset 114 -->
+                      <path d="M 32 115 A 78 78 0 1 1 188 115"
+                            fill="none" stroke="#1F7B4B" stroke-width="15" stroke-linecap="round"
+                            stroke-dasharray="367"
+                            stroke-dashoffset="114" />
+                      <!-- Center typography -->
+                      <text x="110" y="85" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="32" font-weight="800" fill="#101613">69%</text>
+                      <text x="110" y="106" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" font-weight="600" fill="#66706A">of quota closed</text>
+                    </svg>
+                  </div>
+
+                  <!-- Legend Rows with Dots -->
+                  <div class="legend-rows">
+                    <div class="legend-row">
+                      <div class="legend-label">
+                        <span class="legend-bullet bullet-closed"></span>
+                        <span>Closed won</span>
+                      </div>
+                      <span class="legend-amount">$171K</span>
+                    </div>
+                    <div class="legend-row">
+                      <div class="legend-label">
+                        <span class="legend-bullet bullet-commit"></span>
+                        <span>Commit</span>
+                      </div>
+                      <span class="legend-amount">$326K</span>
+                    </div>
+                    <div class="legend-row">
+                      <div class="legend-label">
+                        <span class="legend-bullet bullet-best"></span>
+                        <span>Best case</span>
+                      </div>
+                      <span class="legend-amount">$464K</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Amber Alert Strip -->
+                <div class="amber-warning-strip">
+                  <span class="warning-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                  </span>
+                  <span>$78.7K gap to quota</span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ==================================================================
+             VIEW 2: TASKS VIEW (SWAPPED WHEN TASKS IS CLICKED)
+             ================================================================== -->
+        <section class="view-panel" id="viewTasks">
+
+          <!-- Tasks Header Row -->
+          <div class="header-row">
+            <div class="header-titles">
+              <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                <span>FOLLOW-UPS</span>
+              </div>
+              <h1 class="headline-h1">Tasks</h1>
+              <p class="header-subline">6 open for today, 5 coming up. Check things off as you go.</p>
+            </div>
+            <div class="header-actions">
+              <button class="pill-action-button" id="btnHeaderNewTask">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>+ New task</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Add-Task Bar -->
+          <div class="tasks-action-bar">
+            <!-- 4 small type icons -->
+            <div class="task-type-selectors">
+              <button class="task-type-btn active" title="Call" data-type="Call">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+              </button>
+              <button class="task-type-btn" title="Email" data-type="Email">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </button>
+              <button class="task-type-btn" title="Meeting" data-type="Meeting">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+              </button>
+              <button class="task-type-btn" title="To-do" data-type="To-do">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 11 12 14 22 4"></polyline>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+              </button>
+            </div>
+
+            <input type="text" class="add-task-input" id="newTaskInput" placeholder="Add a task and press Enter…">
+
+            <button class="task-date-selector">
+              <span>Today</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <button class="task-submit-btn" id="newTaskSubmitBtn" title="Add Task">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Filter Chips Row -->
+          <div class="filter-chips-row">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="Call">Calls</button>
+            <button class="filter-chip" data-filter="Email">Emails</button>
+            <button class="filter-chip" data-filter="Meeting">Meetings</button>
+            <button class="filter-chip" data-filter="To-do">To-dos</button>
+          </div>
+
+          <!-- Tasks Layout (2fr : 1fr) -->
+          <div class="tasks-grid-layout">
+
+            <!-- Task List (5 rows) -->
+            <div class="task-cards-list" id="taskListContainer">
+
+              <!-- Task 1 -->
+              <div class="task-item-card" data-category="Call">
+                <div class="task-left-cluster">
+                  <button class="task-checkbox" aria-label="Mark task done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <div class="task-title-group">
+                    <span class="task-item-title">Call Jonas Weber — Pinecrest Bank</span>
+                    <span class="task-meta-line overdue">Follow-up · overdue by 2 days</span>
+                  </div>
+                </div>
+                <span class="priority-badge high">High</span>
+              </div>
+
+              <!-- Task 2 -->
+              <div class="task-item-card" data-category="Email">
+                <div class="task-left-cluster">
+                  <button class="task-checkbox" aria-label="Mark task done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <div class="task-title-group">
+                    <span class="task-item-title">Send proposal to Northwind</span>
+                    <span class="task-meta-line">Deal · closes Friday</span>
+                  </div>
+                </div>
+                <span class="priority-badge high">High</span>
+              </div>
+
+              <!-- Task 3 -->
+              <div class="task-item-card" data-category="Meeting">
+                <div class="task-left-cluster">
+                  <button class="task-checkbox" aria-label="Mark task done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <div class="task-title-group">
+                    <span class="task-item-title">Prepare Q4 forecast review</span>
+                    <span class="task-meta-line">Internal · today 4 PM</span>
+                  </div>
+                </div>
+                <span class="priority-badge medium">Medium</span>
+              </div>
+
+              <!-- Task 4 -->
+              <div class="task-item-card" data-category="Email">
+                <div class="task-left-cluster">
+                  <button class="task-checkbox" aria-label="Mark task done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <div class="task-title-group">
+                    <span class="task-item-title">Email Ava's onboarding list</span>
+                    <span class="task-meta-line">Campaign · tomorrow</span>
+                  </div>
+                </div>
+                <span class="priority-badge low">Low</span>
+              </div>
+
+              <!-- Task 5 -->
+              <div class="task-item-card" data-category="Call">
+                <div class="task-left-cluster">
+                  <button class="task-checkbox" aria-label="Mark task done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  <div class="task-title-group">
+                    <span class="task-item-title">Book demo with Helios Labs</span>
+                    <span class="task-meta-line">New lead · this week</span>
+                  </div>
+                </div>
+                <span class="priority-badge medium">Medium</span>
+              </div>
+
+            </div>
+
+            <!-- Tasks Right Rail Card -->
+            <div class="tasks-progress-card">
+              <!-- Top Section: Daily Progress Ring -->
+              <div class="daily-progress-row">
+                <div class="progress-donut-box">
+                  <svg width="64" height="64" viewBox="0 0 64 64">
+                    <!-- Background circle -->
+                    <circle cx="32" cy="32" r="25" fill="none" stroke="#EBF2ED" stroke-width="5" />
+                    <!-- Progress ring (20% of 2*pi*25 ≈ 157.08 is ~31.42, offset 125.66) -->
+                    <circle id="dailyProgressRing" cx="32" cy="32" r="25" fill="none" stroke="#1F7B4B" stroke-width="5"
+                            stroke-linecap="round"
+                            stroke-dasharray="157.08"
+                            stroke-dashoffset="125.66"
+                            transform="rotate(-90 32 32)" />
+                    <text id="dailyProgressPercentage" x="32" y="37" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="13" font-weight="800" fill="#101613">20%</text>
+                  </svg>
+                </div>
+                <div class="daily-progress-text">
+                  <span class="progress-h3">Daily progress</span>
+                  <span class="progress-count-sub" id="tasksDoneCounter">1 of 6 tasks done</span>
+                </div>
+              </div>
+
+              <div class="rail-divider"></div>
+
+              <!-- By Type Section -->
+              <div class="by-type-block">
+                <span class="by-type-title">By type</span>
+
+                <div class="by-type-row">
+                  <div class="by-type-label">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1F7B4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    <span>Calls</span>
+                  </div>
+                  <span class="by-type-count" id="countCalls">2</span>
+                </div>
+
+                <div class="by-type-row">
+                  <div class="by-type-label">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>Emails</span>
+                  </div>
+                  <span class="by-type-count" id="countEmails">4</span>
+                </div>
+
+                <div class="by-type-row">
+                  <div class="by-type-label">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Meetings</span>
+                  </div>
+                  <span class="by-type-count" id="countMeetings">2</span>
+                </div>
+
+                <div class="by-type-row">
+                  <div class="by-type-label">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>To-dos</span>
+                  </div>
+                  <span class="by-type-count" id="countTodos">1</span>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ========================================================================
+       LIGHTWEIGHT JAVASCRIPT FOR DYNAMIC INTERACTIONS
+       ======================================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // 1. SIDEBAR COLLAPSE TOGGLE
+      const sidebar = document.getElementById('appSidebar');
+      const collapseBtn = document.getElementById('sidebarCollapseBtn');
+
+      collapseBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        if (sidebar.classList.contains('collapsed')) {
+          collapseBtn.setAttribute('title', 'Expand sidebar');
+        } else {
+          collapseBtn.setAttribute('title', 'Collapse sidebar');
+        }
+      });
+
+      // 2. VIEW SWAPPING (DASHBOARD <-> TASKS)
+      const navItemDashboard = document.getElementById('navItemDashboard');
+      const navItemTasks = document.getElementById('navItemTasks');
+      const navLinkDashboard = document.getElementById('navLinkDashboard');
+      const navLinkTasks = document.getElementById('navLinkTasks');
+      const viewDashboard = document.getElementById('viewDashboard');
+      const viewTasks = document.getElementById('viewTasks');
+      const insightPillTasks = document.getElementById('insightPillTasks');
+
+      function switchView(target) {
+        if (target === 'tasks') {
+          navItemDashboard.classList.remove('active');
+          navItemTasks.classList.add('active');
+          viewDashboard.classList.remove('active');
+          viewTasks.classList.add('active');
+        } else {
+          navItemTasks.classList.remove('active');
+          navItemDashboard.classList.add('active');
+          viewTasks.classList.remove('active');
+          viewDashboard.classList.add('active');
+        }
+      }
+
+      navLinkDashboard.addEventListener('click', () => switchView('dashboard'));
+      navLinkTasks.addEventListener('click', () => switchView('tasks'));
+      if (insightPillTasks) {
+        insightPillTasks.addEventListener('click', (e) => {
+          e.preventDefault();
+          switchView('tasks');
+        });
+      }
+
+      // 3. CHART TOGGLE (REVENUE VS DEALS)
+      const btnToggleRevenue = document.getElementById('btnToggleRevenue');
+      const btnToggleDeals = document.getElementById('btnToggleDeals');
+      const datasetRevenueGroup = document.getElementById('datasetRevenueGroup');
+      const datasetDealsGroup = document.getElementById('datasetDealsGroup');
+      const yAxisRevenue = document.getElementById('yAxisRevenue');
+      const yAxisDeals = document.getElementById('yAxisDeals');
+      const chartSubtitleText = document.getElementById('chartSubtitleText');
+
+      btnToggleRevenue.addEventListener('click', () => {
+        btnToggleRevenue.classList.add('active');
+        btnToggleDeals.classList.remove('active');
+        datasetRevenueGroup.style.display = 'inline';
+        datasetDealsGroup.style.display = 'none';
+        yAxisRevenue.style.display = 'inline';
+        yAxisDeals.style.display = 'none';
+        chartSubtitleText.textContent = 'Monthly closed-won revenue against plan';
+      });
+
+      btnToggleDeals.addEventListener('click', () => {
+        btnToggleDeals.classList.add('active');
+        btnToggleRevenue.classList.remove('active');
+        datasetDealsGroup.style.display = 'inline';
+        datasetRevenueGroup.style.display = 'none';
+        yAxisDeals.style.display = 'inline';
+        yAxisRevenue.style.display = 'none';
+        chartSubtitleText.textContent = 'Monthly closed deals volume against plan';
+      });
+
+      // 4. TASK COMPLETION & PROGRESS TRACKING
+      const taskListContainer = document.getElementById('taskListContainer');
+      const tasksDoneCounter = document.getElementById('tasksDoneCounter');
+      const dailyProgressPercentage = document.getElementById('dailyProgressPercentage');
+      const dailyProgressRing = document.getElementById('dailyProgressRing');
+
+      function updateTaskProgress() {
+        const allTasks = taskListContainer.querySelectorAll('.task-item-card');
+        const doneTasks = taskListContainer.querySelectorAll('.task-item-card.completed');
+        const total = allTasks.length;
+        const done = doneTasks.length;
+        tasksDoneCounter.textContent = `${done} of ${total} tasks done`;
+
+        const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+        dailyProgressPercentage.textContent = `${pct}%`;
+
+        // Ring math: Circumference for R=25 is 2 * Math.PI * 25 ≈ 157.08
+        const circ = 157.08;
+        const offset = circ - (circ * pct / 100);
+        dailyProgressRing.setAttribute('stroke-dashoffset', offset);
+      }
+
+      taskListContainer.addEventListener('click', (e) => {
+        const checkbox = e.target.closest('.task-checkbox');
+        if (checkbox) {
+          const card = checkbox.closest('.task-item-card');
+          card.classList.toggle('completed');
+          updateTaskProgress();
+        }
+      });
+
+      // Initial task progress calculation
+      updateTaskProgress();
+
+      // 5. TASK FILTER CHIPS
+      const filterChips = document.querySelectorAll('.filter-chip');
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          filterChips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const filter = chip.getAttribute('data-filter');
+
+          const taskCards = taskListContainer.querySelectorAll('.task-item-card');
+          taskCards.forEach(card => {
+            if (filter === 'all' || card.getAttribute('data-category') === filter) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // 6. ADD NEW TASK
+      const newTaskInput = document.getElementById('newTaskInput');
+      const newTaskSubmitBtn = document.getElementById('newTaskSubmitBtn');
+      const taskTypeBtns = document.querySelectorAll('.task-type-btn');
+      let selectedTaskType = 'Call';
+
+      taskTypeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          taskTypeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedTaskType = btn.getAttribute('data-type');
+        });
+      });
+
+      function addNewTask() {
+        const text = newTaskInput.value.trim();
+        if (!text) return;
+
+        const newCard = document.createElement('div');
+        newCard.className = 'task-item-card';
+        newCard.setAttribute('data-category', selectedTaskType);
+        newCard.innerHTML = `
+          <div class="task-left-cluster">
+            <button class="task-checkbox" aria-label="Mark task done">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <div class="task-title-group">
+              <span class="task-item-title">${escapeHtml(text)}</span>
+              <span class="task-meta-line">${selectedTaskType} · Today</span>
+            </div>
+          </div>
+          <span class="priority-badge medium">Medium</span>
+        `;
+        taskListContainer.prepend(newCard);
+        newTaskInput.value = '';
+        updateTaskProgress();
+
+        // Update type counters
+        const countId = 'count' + (selectedTaskType === 'To-do' ? 'Todos' : selectedTaskType + 's');
+        const counterEl = document.getElementById(countId);
+        if (counterEl) {
+          counterEl.textContent = parseInt(counterEl.textContent || '0', 10) + 1;
+        }
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>'"]/g, tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag));
+      }
+
+      newTaskSubmitBtn.addEventListener('click', addNewTask);
+      newTaskInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          addNewTask();
+        }
+      });
+
+      // 7. KEYBOARD SHORTCUT (⌘K / Ctrl+K) FOR GLOBAL SEARCH
+      const globalSearchInput = document.getElementById('globalSearchInput');
+      window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          globalSearchInput.focus();
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>
